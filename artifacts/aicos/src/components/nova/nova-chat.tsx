@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Sparkles, Brain, Loader2, StopCircle, Sun, BarChart3, TrendingUp, MessageSquare, Copy, Check, RefreshCw } from "lucide-react";
-import { useUser } from "@clerk/react";
+import { useOptionalUser } from "@/lib/clerk-optional";
 import { cn } from "@/lib/utils";
 import { NovaMarkdown } from "./nova-markdown";
 import {
@@ -23,7 +23,7 @@ interface NovaChatProps {
 }
 
 export function NovaChat({ conversation, onTitleChange }: NovaChatProps) {
-  const { user } = useUser();
+  const { user } = useOptionalUser();
   const [messages, setMessages] = useState<NovaMessage[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useUser } from "@clerk/react";
+import { useOptionalUser } from "@/lib/clerk-optional";
 import { Sparkles, TrendingUp, AlertTriangle, Package, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +27,7 @@ const item = {
 };
 
 export function DashGreeting() {
-  const { user } = useUser();
+  const { user } = useOptionalUser();
   const firstName = user?.firstName ?? "there";
 
   return (

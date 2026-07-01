@@ -21,10 +21,20 @@ export function Navbar() {
         </Link>
         
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-          <Link href="#features" className="hover:text-foreground transition-colors">Features</Link>
-          <Link href="#how-it-works" className="hover:text-foreground transition-colors">How it Works</Link>
-          <Link href="#pricing" className="hover:text-foreground transition-colors">Pricing</Link>
-          <Link href="#faq" className="hover:text-foreground transition-colors">FAQ</Link>
+          {[
+            { label: "Features", id: "features" },
+            { label: "How it Works", id: "how-it-works" },
+            { label: "Pricing", id: "pricing" },
+            { label: "FAQ", id: "faq" },
+          ].map(({ label, id }) => (
+            <button
+              key={id}
+              onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })}
+              className="hover:text-foreground transition-colors cursor-pointer bg-transparent border-0 p-0 font-medium text-sm text-muted-foreground"
+            >
+              {label}
+            </button>
+          ))}
         </nav>
 
         <div className="flex items-center gap-4">

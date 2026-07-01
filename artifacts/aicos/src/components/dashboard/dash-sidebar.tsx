@@ -8,6 +8,8 @@ import {
   Store, Sparkles, Compass
 } from "lucide-react";
 import { useUser, useClerk } from "@clerk/react";
+
+const clerkEnabled = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 import { useTheme } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -41,10 +43,48 @@ interface DashSidebarProps {
   setCollapsed: (v: boolean) => void;
 }
 
-export function DashSidebar({ collapsed, setCollapsed }: DashSidebarProps) {
-  const [location] = useLocation();
+function UserMenuSection({ collapsed }: { collapsed: boolean }) {
   const { user } = useUser();
   const { signOut } = useClerk();
+  const { theme, setTheme } = useTheme();
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="flex items-center gap-2.5 w-full px-2.5 py-2 rounded-lg hover:bg-white/5 transition-colors group">
+          <Avatar className="h-7 w-7 shrink-0">
+            <AvatarImage src={user?.imageUrl} />
+            <AvatarFallback className="bg-zinc-700 text-zinc-200 text-xs font-semibold">
+              {user?.firstName?.[0]}{user?.lastName?.[0]}
+            </AvatarFallback>
+          </Avatar>
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 text-left min-w-0">
+                <p className="text-xs font-medium text-zinc-200 truncate">{user?.firstName} {user?.lastName}</p>
+                <p className="text-xs text-zinc-500 truncate">{user?.emailAddresses?.[0]?.emailAddress}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          {!collapsed && <ChevronsUpDown className="h-3.5 w-3.5 text-zinc-500 shrink-0" />}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent side="top" align="start" className="w-52 bg-zinc-900 border-zinc-700">
+        <DropdownMenuItem className="text-zinc-300 hover:text-white focus:text-white focus:bg-zinc-800" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+          {theme === "dark" ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
+          {theme === "dark" ? "Light mode" : "Dark mode"}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator className="bg-zinc-700" />
+        <DropdownMenuItem className="text-red-400 hover:text-red-300 focus:text-red-300 focus:bg-zinc-800" onClick={() => signOut({ redirectUrl: "/" })}>
+          <LogOut className="h-4 w-4 mr-2" />
+          Sign out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+export function DashSidebar({ collapsed, setCollapsed }: DashSidebarProps) {
+  const [location] = useLocation();
   const { theme, setTheme } = useTheme();
 
   const isActive = (path: string) => {
@@ -216,38 +256,7 @@ export function DashSidebar({ collapsed, setCollapsed }: DashSidebarProps) {
 
       {/* User + collapse */}
       <div className="border-t border-zinc-800/60 p-2 space-y-1 shrink-0">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2.5 w-full px-2.5 py-2 rounded-lg hover:bg-white/5 transition-colors group">
-              <Avatar className="h-7 w-7 shrink-0">
-                <AvatarImage src={user?.imageUrl} />
-                <AvatarFallback className="bg-zinc-700 text-zinc-200 text-xs font-semibold">
-                  {user?.firstName?.[0]}{user?.lastName?.[0]}
-                </AvatarFallback>
-              </Avatar>
-              <AnimatePresence>
-                {!collapsed && (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 text-left min-w-0">
-                    <p className="text-xs font-medium text-zinc-200 truncate">{user?.firstName} {user?.lastName}</p>
-                    <p className="text-xs text-zinc-500 truncate">{user?.emailAddresses?.[0]?.emailAddress}</p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              {!collapsed && <ChevronsUpDown className="h-3.5 w-3.5 text-zinc-500 shrink-0" />}
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent side="top" align="start" className="w-52 bg-zinc-900 border-zinc-700">
-            <DropdownMenuItem className="text-zinc-300 hover:text-white focus:text-white focus:bg-zinc-800" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-              {theme === "dark" ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
-              {theme === "dark" ? "Light mode" : "Dark mode"}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-zinc-700" />
-            <DropdownMenuItem className="text-red-400 hover:text-red-300 focus:text-red-300 focus:bg-zinc-800" onClick={() => signOut({ redirectUrl: "/" })}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {clerkEnabled && <UserMenuSection collapsed={collapsed} />}
 
         <button
           onClick={() => setCollapsed(!collapsed)}

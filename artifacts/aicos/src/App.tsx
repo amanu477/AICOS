@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { ClerkProvider, SignIn, SignUp, Show, useClerk } from '@clerk/react';
 import { publishableKeyFromHost } from '@clerk/react/internal';
 import { shadcn } from '@clerk/themes';
-import { Switch, Route, useLocation, Redirect, Router as WouterRouter } from 'wouter';
+import { Switch, Route, Link, useLocation, Redirect, Router as WouterRouter } from 'wouter';
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { OptionalUserProvider } from "@/lib/clerk-optional";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -176,10 +177,36 @@ function AppRoutes() {
   if (!clerkPubKey) {
     return (
       <QueryClientProvider client={queryClient}>
+        <OptionalUserProvider clerkEnabled={false}>
         <TooltipProvider>
-          <LandingPage />
+          <Switch>
+            <Route path="/" component={LandingPage} />
+            <Route path="/sign-in/*?" component={() => (
+              <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4">
+                <div className="text-center space-y-4">
+                  <p className="text-muted-foreground">Auth is not configured yet.</p>
+                  <Link href="/">← Back to home</Link>
+                </div>
+              </div>
+            )} />
+            <Route path="/sign-up/*?" component={() => (
+              <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4">
+                <div className="text-center space-y-4">
+                  <p className="text-muted-foreground">Auth is not configured yet.</p>
+                  <Link href="/">← Back to home</Link>
+                </div>
+              </div>
+            )} />
+            <Route path="/dashboard/:rest*" component={DashboardPage} />
+            <Route path="/dashboard" component={DashboardPage} />
+            <Route path="/dashboard/products" component={ProductsPage} />
+            <Route path="/nova" component={NovaPage} />
+            <Route path="/discovery" component={DiscoveryPage} />
+            <Route component={LandingPage} />
+          </Switch>
           <Toaster />
         </TooltipProvider>
+        </OptionalUserProvider>
       </QueryClientProvider>
     );
   }
@@ -195,6 +222,7 @@ function AppRoutes() {
       routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
     >
       <QueryClientProvider client={queryClient}>
+        <OptionalUserProvider clerkEnabled={true}>
         <TooltipProvider>
           <ClerkQueryClientCacheInvalidator />
           <Switch>
@@ -211,6 +239,7 @@ function AppRoutes() {
           </Switch>
           <Toaster />
         </TooltipProvider>
+        </OptionalUserProvider>
       </QueryClientProvider>
     </ClerkProvider>
   );

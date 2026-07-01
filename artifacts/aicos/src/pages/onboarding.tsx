@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Hexagon, ArrowLeft, Shirt, Laptop, Leaf, Sparkles, Trophy, Coffee, Diamond, MoreHorizontal, TrendingUp, Clock, Search, Target, Settings, Eye } from "lucide-react";
-import { useUser } from "@clerk/react";
+import { useOptionalUser } from "@/lib/clerk-optional";
 import { useLocation } from "wouter";
 
 const COUNTRIES = [
@@ -58,7 +58,7 @@ const EXPERIENCE_LEVELS = [
 ];
 
 export function OnboardingPage() {
-  const { user } = useUser();
+  const { user } = useOptionalUser();
   const [, setLocation] = useLocation();
   const [step, setStep] = useState(1);
   const [answers, setAnswers] = useState<Record<string, any>>({});
