@@ -41,8 +41,12 @@ export function Navbar() {
           </Button>
           
           <div className="hidden sm:flex items-center gap-2">
-            <Button variant="ghost" data-testid="button-login">Log in</Button>
-            <Button data-testid="button-start-trial">Start Free Trial</Button>
+            <Link href="/sign-in">
+              <Button variant="ghost" data-testid="button-login">Log in</Button>
+            </Link>
+            <Link href="/sign-up">
+              <Button data-testid="button-start-trial">Start Free Trial</Button>
+            </Link>
           </div>
         </div>
       </div>
