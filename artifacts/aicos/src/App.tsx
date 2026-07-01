@@ -24,6 +24,7 @@ import { Footer } from "@/components/landing/footer";
 // Auth/onboarding pages (you will create these)
 import { OnboardingPage } from "@/pages/onboarding";
 import { ConnectShopifyPage } from "@/pages/connect-shopify";
+import { DashboardPage } from "@/pages/dashboard";
 
 // REQUIRED — copy verbatim
 const clerkPubKey = publishableKeyFromHost(
@@ -190,6 +191,8 @@ function AppRoutes() {
             <Route path="/sign-up/*?" component={SignUpPage} />
             <Route path="/onboarding" component={() => <ProtectedRoute component={OnboardingPage} />} />
             <Route path="/connect-shopify" component={() => <ProtectedRoute component={ConnectShopifyPage} />} />
+            <Route path="/dashboard" component={() => <ProtectedRoute component={DashboardPage} />} />
+            <Route path="/dashboard/:rest*" component={() => <ProtectedRoute component={DashboardPage} />} />
           </Switch>
           <Toaster />
         </TooltipProvider>
