@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "AICOS – AI Commerce Operating System"
+version = "1.0.0"
+id = "artifacts/aicos"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23013
+
+[services.development]
+run = "pnpm --filter @workspace/aicos run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/aicos", "run", "build" ]
+publicDir = "artifacts/aicos/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23013"
+BASE_PATH = "/"
