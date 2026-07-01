@@ -28,11 +28,12 @@ import { DashboardPage } from "@/pages/dashboard";
 import { NovaPage } from "@/pages/nova";
 import { DiscoveryPage } from "@/pages/discovery";
 
-// REQUIRED — copy verbatim
-const clerkPubKey = publishableKeyFromHost(
-  window.location.hostname,
-  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
-);
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+  ? publishableKeyFromHost(
+      window.location.hostname,
+      import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
+    )
+  : null;
 const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -40,10 +41,6 @@ function stripBase(path: string): string {
   return basePath && path.startsWith(basePath)
     ? path.slice(basePath.length) || "/"
     : path;
-}
-
-if (!clerkPubKey) {
-  throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY');
 }
 
 // Build appearance matching the dark AICOS theme
@@ -174,6 +171,18 @@ function ClerkQueryClientCacheInvalidator() {
 
 function AppRoutes() {
   const [, setLocation] = useLocation();
+
+  if (!clerkPubKey) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <LandingPage />
+          <Toaster />
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
+
   return (
     <ClerkProvider
       publishableKey={clerkPubKey}
