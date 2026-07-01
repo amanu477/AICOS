@@ -2,6 +2,24 @@ import { pgTable, text, uuid, integer, numeric, boolean, timestamp, jsonb, pgEnu
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
+export interface AiOptimization {
+  seoTitle: string;
+  seoDescription: string;
+  productDescription: string;
+  bulletPoints: string[];
+  metaDescription: string;
+  altText: string;
+  collectionSuggestions: string[];
+  tagSuggestions: string[];
+  pricingSuggestion: { suggestedPrice: string; reasoning: string };
+  discountSuggestion: { percentage: number; occasion: string; reasoning: string };
+  bundleSuggestions: { name: string; rationale: string }[];
+  crossSellSuggestions: string[];
+  upsellSuggestions: string[];
+  brandTone: string;
+  generatedAt: string;
+}
+
 export const productStatusEnum = pgEnum("product_status", ["active", "archived", "draft"]);
 
 export const productsTable = pgTable("products", {
@@ -29,6 +47,8 @@ export const productsTable = pgTable("products", {
   seoDescription: text("seo_description"),
   seoScore: integer("seo_score"),
   descriptionAi: text("description_ai"),
+  aiOptimization: jsonb("ai_optimization").$type<AiOptimization | null>().default(null),
+  aiOptimizationStatus: text("ai_optimization_status").$type<"pending" | "generating" | "done" | "failed">().default("pending"),
   shopifyCreatedAt: timestamp("shopify_created_at", { withTimezone: true }),
   shopifyUpdatedAt: timestamp("shopify_updated_at", { withTimezone: true }),
   deletedAt: timestamp("deleted_at", { withTimezone: true }),

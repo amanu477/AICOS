@@ -25,6 +25,7 @@ import { Footer } from "@/components/landing/footer";
 import { OnboardingPage } from "@/pages/onboarding";
 import { ConnectShopifyPage } from "@/pages/connect-shopify";
 import { DashboardPage } from "@/pages/dashboard";
+import { ProductsPage } from "@/pages/products";
 import { NovaPage } from "@/pages/nova";
 import { DiscoveryPage } from "@/pages/discovery";
 
@@ -203,6 +204,7 @@ function AppRoutes() {
             <Route path="/onboarding" component={() => <ProtectedRoute component={OnboardingPage} />} />
             <Route path="/connect-shopify" component={() => <ProtectedRoute component={ConnectShopifyPage} />} />
             <Route path="/dashboard" component={() => <ProtectedRoute component={DashboardPage} />} />
+            <Route path="/dashboard/products" component={() => <ProtectedRoute component={ProductsPage} />} />
             <Route path="/dashboard/:rest*" component={() => <ProtectedRoute component={DashboardPage} />} />
             <Route path="/nova" component={() => <ProtectedRoute component={NovaPage} />} />
             <Route path="/discovery" component={() => <ProtectedRoute component={DiscoveryPage} />} />

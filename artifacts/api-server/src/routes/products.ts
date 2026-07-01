@@ -7,6 +7,7 @@ import { shopifyRequestWithToken } from "../lib/shopify-api.js";
 import { decrypt } from "../lib/encryption.js";
 import { z } from "zod";
 import { logger } from "../lib/logger.js";
+import { generateProductOptimization } from "../services/product-ai.service.js";
 
 const router: IRouter = Router();
 
@@ -227,6 +228,134 @@ router.post("/stores/:storeId/products/:productId/unpublish", async (req: Reques
     `products/${product.shopifyProductId}.json`, { method: "PUT", body: { product: { status: "draft", published_at: null } } }
   );
   const [updated] = await db.update(productsTable).set({ status: "draft", publishedAt: null }).where(eq(productsTable.id, productId)).returning();
+  res.json(updated);
+});
+
+// ── AI Optimization Queue ─────────────────────────────────────────────────────
+router.get("/stores/:storeId/products/ai-queue", async (req: Request, res: Response): Promise<void> => {
+  const access = await requireStoreAccess(req, res);
+  if (!access) return;
+  const { storeId } = access;
+  const limit = Math.min(Number(req.query.limit ?? 50), 250);
+  const offset = Number(req.query.offset ?? 0);
+  const statusFilter = req.query.status as string | undefined;
+
+  const conditions = [eq(productsTable.storeId, storeId), isNull(productsTable.deletedAt)];
+  if (statusFilter) conditions.push(eq(productsTable.aiOptimizationStatus, statusFilter as any));
+
+  const products = await db.select().from(productsTable)
+    .where(and(...conditions))
+    .orderBy(desc(productsTable.updatedAt))
+    .limit(limit).offset(offset);
+
+  const [{ count }] = await db.select({ count: sql<number>`count(*)::int` })
+    .from(productsTable).where(and(...conditions));
+
+  res.json({ products, total: count, limit, offset });
+});
+
+// ── Trigger AI Optimization ───────────────────────────────────────────────────
+router.post("/stores/:storeId/products/:productId/ai-optimize", async (req: Request, res: Response): Promise<void> => {
+  const access = await requireStoreAccess(req, res);
+  if (!access) return;
+  const { storeId } = access;
+  const productId = Array.isArray(req.params.productId) ? req.params.productId[0] : req.params.productId;
+
+  const [product] = await db.select().from(productsTable).where(
+    and(eq(productsTable.storeId, storeId), eq(productsTable.id, productId), isNull(productsTable.deletedAt))
+  );
+  if (!product) { res.status(404).json({ error: "Product not found" }); return; }
+
+  res.json({ status: "generating", productId });
+
+  generateProductOptimization(productId).catch(err => {
+    logger.error({ productId, err }, "Background AI optimization failed");
+  });
+});
+
+// ── Save Edited AI Optimization ───────────────────────────────────────────────
+const SaveOptimizationSchema = z.object({
+  seoTitle: z.string().optional(),
+  seoDescription: z.string().optional(),
+  productDescription: z.string().optional(),
+  bulletPoints: z.array(z.string()).optional(),
+  metaDescription: z.string().optional(),
+  altText: z.string().optional(),
+  collectionSuggestions: z.array(z.string()).optional(),
+  tagSuggestions: z.array(z.string()).optional(),
+  pricingSuggestion: z.object({ suggestedPrice: z.string(), reasoning: z.string() }).optional(),
+  discountSuggestion: z.object({ percentage: z.number(), occasion: z.string(), reasoning: z.string() }).optional(),
+  bundleSuggestions: z.array(z.object({ name: z.string(), rationale: z.string() })).optional(),
+  crossSellSuggestions: z.array(z.string()).optional(),
+  upsellSuggestions: z.array(z.string()).optional(),
+  brandTone: z.string().optional(),
+});
+
+router.patch("/stores/:storeId/products/:productId/ai-optimization", async (req: Request, res: Response): Promise<void> => {
+  const access = await requireStoreAccess(req, res);
+  if (!access) return;
+  const { storeId } = access;
+  const productId = Array.isArray(req.params.productId) ? req.params.productId[0] : req.params.productId;
+
+  const parsed = SaveOptimizationSchema.safeParse(req.body);
+  if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
+
+  const [product] = await db.select().from(productsTable).where(
+    and(eq(productsTable.storeId, storeId), eq(productsTable.id, productId))
+  );
+  if (!product) { res.status(404).json({ error: "Product not found" }); return; }
+
+  const updatedOptimization = { ...(product.aiOptimization ?? {}), ...parsed.data };
+  const [updated] = await db.update(productsTable).set({
+    aiOptimization: updatedOptimization as any,
+    updatedAt: new Date(),
+  }).where(eq(productsTable.id, productId)).returning();
+
+  res.json(updated);
+});
+
+// ── Publish AI Optimization to Shopify ───────────────────────────────────────
+router.post("/stores/:storeId/products/:productId/ai-publish", async (req: Request, res: Response): Promise<void> => {
+  const access = await requireStoreAccess(req, res);
+  if (!access) return;
+  const { storeId, store } = access;
+  const productId = Array.isArray(req.params.productId) ? req.params.productId[0] : req.params.productId;
+
+  const [product] = await db.select().from(productsTable).where(
+    and(eq(productsTable.storeId, storeId), eq(productsTable.id, productId), isNull(productsTable.deletedAt))
+  );
+  if (!product) { res.status(404).json({ error: "Product not found" }); return; }
+  if (!product.aiOptimization) { res.status(400).json({ error: "No AI optimization found. Generate one first." }); return; }
+
+  const ai = product.aiOptimization;
+
+  const shopifyUpdate: Record<string, unknown> = {
+    body_html: ai.productDescription,
+    tags: ai.tagSuggestions.join(", "),
+    metafields_global_title_tag: ai.seoTitle,
+    metafields_global_description_tag: ai.seoDescription,
+  };
+
+  await shopifyRequestWithToken(store.shopifyDomain, store.accessTokenEncrypted,
+    `products/${product.shopifyProductId}.json`, { method: "PUT", body: { product: shopifyUpdate } }
+  );
+
+  const [updated] = await db.update(productsTable).set({
+    bodyHtml: ai.productDescription,
+    seoTitle: ai.seoTitle,
+    seoDescription: ai.seoDescription,
+    aiTags: ai.tagSuggestions,
+    updatedAt: new Date(),
+  }).where(eq(productsTable.id, productId)).returning();
+
+  await db.insert(logsTable).values({
+    storeId,
+    action: "product.ai_published",
+    entityType: "product",
+    entityId: productId,
+    after: { seoTitle: ai.seoTitle, tags: ai.tagSuggestions },
+  });
+
   res.json(updated);
 });
 

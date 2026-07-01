@@ -9,6 +9,7 @@ import { eq, and } from "drizzle-orm";
 import { shopifyRequestWithToken } from "../lib/shopify-api.js";
 import { logger } from "../lib/logger.js";
 import { decrypt } from "../lib/encryption.js";
+import { generateProductOptimization } from "./product-ai.service.js";
 
 const PAGE_SIZE = 250;
 
@@ -192,10 +193,16 @@ async function upsertProduct(storeId: string, p: ShopifyProduct): Promise<void> 
     shopifyUpdatedAt: p.updated_at ? new Date(p.updated_at) : null,
   };
 
-  await db.insert(productsTable).values(values).onConflictDoUpdate({
+  const [upserted] = await db.insert(productsTable).values(values).onConflictDoUpdate({
     target: [productsTable.storeId, productsTable.shopifyProductId],
     set: { ...values, updatedAt: new Date() },
-  });
+  }).returning({ id: productsTable.id, aiOptimizationStatus: productsTable.aiOptimizationStatus });
+
+  if (upserted && upserted.aiOptimizationStatus === "pending") {
+    generateProductOptimization(upserted.id).catch(err => {
+      logger.warn({ productId: upserted.id, err }, "AI optimization skipped during sync");
+    });
+  }
 }
 
 async function upsertVariant(storeId: string, shopifyProductId: string, v: ShopifyVariant): Promise<void> {
