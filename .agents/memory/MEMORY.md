@@ -1,3 +1,4 @@
 - [Shopify Integration Architecture](shopify-integration.md) — OAuth, AES-256-GCM token encryption, BullMQ sync workers, webhook HMAC verification.
 - [Drizzle JSONB type mismatch](drizzle-jsonb-types.md) — drizzle-zod generates Json for jsonb columns; don't use InsertX type annotations when inserting typed JSONB values.
 - [Stack Choices](stack-choices.md) — Drizzle ORM only (not Prisma), zod must be added to api-server dependencies explicitly (not transitive from api-zod).
+- [Nova AI Architecture](nova-architecture.md) — Groq (llama-3.3-70b-versatile), SSE streaming, DB schema in lib/db/src/schema/nova.ts, routes at /api/nova/*, frontend at /nova.

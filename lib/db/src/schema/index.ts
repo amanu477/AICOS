@@ -8,3 +8,4 @@ export * from "./inventory";
 export * from "./webhooks";
 export * from "./sync-jobs";
 export * from "./logs";
+export * from "./nova";

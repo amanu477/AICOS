@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Package, ShoppingCart, BarChart3, Zap,
   Truck, Download, Settings, Hexagon, ChevronLeft, ChevronRight,
   Bell, Search, Moon, Sun, LogOut, User, ChevronsUpDown,
-  Store
+  Store, Sparkles
 } from "lucide-react";
 import { useUser, useClerk } from "@clerk/react";
 import { useTheme } from "@/components/theme-provider";
@@ -21,6 +21,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 
 const NAV_ITEMS = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", badge: null },
+  { icon: Sparkles, label: "Nova AI", path: "/nova", badge: null, highlight: true },
   { icon: Package, label: "Products", path: "/dashboard/products", badge: "23" },
   { icon: ShoppingCart, label: "Orders", path: "/dashboard/orders", badge: null },
   { icon: BarChart3, label: "Analytics", path: "/dashboard/analytics", badge: null },
@@ -96,7 +97,7 @@ export function DashSidebar({ collapsed, setCollapsed }: DashSidebarProps) {
 
       {/* Nav */}
       <nav className="flex-1 px-2 py-2 space-y-0.5 overflow-y-auto overflow-x-hidden">
-        {NAV_ITEMS.map(({ icon: Icon, label, path, badge }) => {
+        {NAV_ITEMS.map(({ icon: Icon, label, path, badge, highlight }) => {
           const active = isActive(path);
           const item = (
             <Link
@@ -105,18 +106,30 @@ export function DashSidebar({ collapsed, setCollapsed }: DashSidebarProps) {
               className={cn(
                 "flex items-center gap-3 px-2.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 relative group",
                 active
-                  ? "bg-white/10 text-white"
-                  : "text-zinc-400 hover:text-zinc-100 hover:bg-white/5"
+                  ? highlight ? "bg-violet-500/20 text-violet-200" : "bg-white/10 text-white"
+                  : highlight
+                    ? "text-violet-400 hover:text-violet-200 hover:bg-violet-500/10"
+                    : "text-zinc-400 hover:text-zinc-100 hover:bg-white/5"
               )}
             >
               {active && (
                 <motion.div
                   layoutId="sidebar-active"
-                  className="absolute inset-0 rounded-lg bg-white/8 border border-white/10"
+                  className={cn(
+                    "absolute inset-0 rounded-lg border",
+                    highlight
+                      ? "bg-violet-500/15 border-violet-500/30"
+                      : "bg-white/8 border-white/10"
+                  )}
                   transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
                 />
               )}
-              <Icon className={cn("h-4 w-4 shrink-0 relative z-10", active ? "text-white" : "text-zinc-400 group-hover:text-zinc-200")} />
+              <Icon className={cn(
+                "h-4 w-4 shrink-0 relative z-10",
+                active
+                  ? highlight ? "text-violet-300" : "text-white"
+                  : highlight ? "text-violet-400 group-hover:text-violet-200" : "text-zinc-400 group-hover:text-zinc-200"
+              )} />
               <AnimatePresence>
                 {!collapsed && (
                   <motion.span
@@ -132,6 +145,11 @@ export function DashSidebar({ collapsed, setCollapsed }: DashSidebarProps) {
               {badge && !collapsed && (
                 <span className="relative z-10 text-xs font-medium px-1.5 py-0.5 rounded-full bg-white/10 text-zinc-300 leading-none">
                   {badge}
+                </span>
+              )}
+              {highlight && !active && !collapsed && (
+                <span className="relative z-10 text-xs font-medium px-1.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300 leading-none border border-violet-500/20">
+                  AI
                 </span>
               )}
             </Link>

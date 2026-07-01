@@ -25,6 +25,7 @@ import { Footer } from "@/components/landing/footer";
 import { OnboardingPage } from "@/pages/onboarding";
 import { ConnectShopifyPage } from "@/pages/connect-shopify";
 import { DashboardPage } from "@/pages/dashboard";
+import { NovaPage } from "@/pages/nova";
 
 // REQUIRED — copy verbatim
 const clerkPubKey = publishableKeyFromHost(
@@ -193,6 +194,7 @@ function AppRoutes() {
             <Route path="/connect-shopify" component={() => <ProtectedRoute component={ConnectShopifyPage} />} />
             <Route path="/dashboard" component={() => <ProtectedRoute component={DashboardPage} />} />
             <Route path="/dashboard/:rest*" component={() => <ProtectedRoute component={DashboardPage} />} />
+            <Route path="/nova" component={() => <ProtectedRoute component={NovaPage} />} />
           </Switch>
           <Toaster />
         </TooltipProvider>
