@@ -1,5 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { getRedisConnection } from "./lib/redis";
+import { startSyncWorker } from "./queues/shopify.queue";
 
 const rawPort = process.env["PORT"];
 
@@ -13,6 +15,13 @@ const port = Number(rawPort);
 
 if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
+}
+
+// Initialize Redis connection and start workers if available
+getRedisConnection();
+const worker = startSyncWorker();
+if (!worker) {
+  logger.warn("Shopify sync worker not started — Redis unavailable. Set REDIS_URL to enable background jobs.");
 }
 
 app.listen(port, (err) => {

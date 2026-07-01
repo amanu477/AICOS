@@ -357,6 +357,8 @@ export function OnboardingPage() {
             </Button>
           </div>
         );
+      default:
+        return null;
     }
   };
 
