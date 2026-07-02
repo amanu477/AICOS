@@ -28,7 +28,7 @@ export function ConnectShopifyPage() {
 
     if (!raw) return;
     setStatus("loading");
-    window.location.href = `/api/shopify/install?shop=${encodeURIComponent(shop)}`;
+    window.open(`/api/shopify/install?shop=${encodeURIComponent(shop)}`, "_blank");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
