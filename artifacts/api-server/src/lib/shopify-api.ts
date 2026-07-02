@@ -114,11 +114,9 @@ export async function exchangeCodeForToken(
 
 export const SHOPIFY_SCOPES = [
   "read_products", "write_products",
-  "read_customers", "write_customers",
-  "read_orders", "write_orders",
+  "read_customers",
+  "read_orders",
   "read_inventory", "write_inventory",
-  "read_collections", "write_collections",
-  "read_analytics",
   "read_themes",
 ];
 
