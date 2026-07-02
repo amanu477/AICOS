@@ -27,3 +27,4 @@ channel = "stable-25_05"
 [userenv.shared]
 LOG_LEVEL = "info"
 NODE_ENV = "development"
+APP_URL = "https://2a2d7026-7640-463c-8e0e-b7f3ac1edc0c-00-1iza26pjye37c.kirk.replit.dev"
