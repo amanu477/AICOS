@@ -31,7 +31,7 @@ lib/
 ## Running
 
 Two workflows run in parallel (started automatically with the Run button):
-- **Start application** — Vite dev server on port 23013
+- **Start application** — Vite dev server on port 5000
 - **Start Backend** — Express API on port 8080
 
 To push DB schema changes:
