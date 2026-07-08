@@ -29,6 +29,13 @@ import { DashboardPage } from "@/pages/dashboard";
 import { ProductsPage } from "@/pages/products";
 import { NovaPage } from "@/pages/nova";
 import { DiscoveryPage } from "@/pages/discovery";
+import { OrdersPage } from "@/pages/orders";
+import { AnalyticsPage } from "@/pages/analytics";
+import { AutomationPage } from "@/pages/automation";
+import { SuppliersPage } from "@/pages/suppliers";
+import { ImportsPage } from "@/pages/imports";
+import { NotificationsPage } from "@/pages/notifications";
+import { SettingsPage } from "@/pages/settings";
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
   ? publishableKeyFromHost(
@@ -197,9 +204,16 @@ function AppRoutes() {
                 </div>
               </div>
             )} />
-            <Route path="/dashboard/:rest*" component={DashboardPage} />
             <Route path="/dashboard" component={DashboardPage} />
             <Route path="/dashboard/products" component={ProductsPage} />
+            <Route path="/dashboard/orders" component={OrdersPage} />
+            <Route path="/dashboard/analytics" component={AnalyticsPage} />
+            <Route path="/dashboard/automation" component={AutomationPage} />
+            <Route path="/dashboard/suppliers" component={SuppliersPage} />
+            <Route path="/dashboard/imports" component={ImportsPage} />
+            <Route path="/dashboard/notifications" component={NotificationsPage} />
+            <Route path="/dashboard/settings" component={SettingsPage} />
+            <Route path="/dashboard/:rest*" component={DashboardPage} />
             <Route path="/nova" component={NovaPage} />
             <Route path="/discovery" component={DiscoveryPage} />
             <Route component={LandingPage} />
@@ -233,6 +247,13 @@ function AppRoutes() {
             <Route path="/connect-shopify" component={() => <ProtectedRoute component={ConnectShopifyPage} />} />
             <Route path="/dashboard" component={() => <ProtectedRoute component={DashboardPage} />} />
             <Route path="/dashboard/products" component={() => <ProtectedRoute component={ProductsPage} />} />
+            <Route path="/dashboard/orders" component={() => <ProtectedRoute component={OrdersPage} />} />
+            <Route path="/dashboard/analytics" component={() => <ProtectedRoute component={AnalyticsPage} />} />
+            <Route path="/dashboard/automation" component={() => <ProtectedRoute component={AutomationPage} />} />
+            <Route path="/dashboard/suppliers" component={() => <ProtectedRoute component={SuppliersPage} />} />
+            <Route path="/dashboard/imports" component={() => <ProtectedRoute component={ImportsPage} />} />
+            <Route path="/dashboard/notifications" component={() => <ProtectedRoute component={NotificationsPage} />} />
+            <Route path="/dashboard/settings" component={() => <ProtectedRoute component={SettingsPage} />} />
             <Route path="/dashboard/:rest*" component={() => <ProtectedRoute component={DashboardPage} />} />
             <Route path="/nova" component={() => <ProtectedRoute component={NovaPage} />} />
             <Route path="/discovery" component={() => <ProtectedRoute component={DiscoveryPage} />} />
